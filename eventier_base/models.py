@@ -1,54 +1,118 @@
 from django.db import models
-import bcrypt
+from django.utils.text import slugify
 from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin
+
 # Create your models here.
 
-class Custom_User(models.Model):
+
+class CustomUser(AbstractBaseUser,PermissionsMixin):
     firstname = models.CharField(max_length=20, blank=False, null=False)
     lastname = models.CharField(max_length=20, blank=False, null=False)
     user_email = models.EmailField(unique=True, blank=False, null=False)
-    username = models.CharField(unique=True,max_length=25)
-    password = models.CharField(max_length=30)
+    slug = models.SlugField(max_length=300, blank=True, unique=True)
+    username = models.CharField(unique=True, max_length=25)
+    last_login = models.DateTimeField(null=True,blank=True)
+    is_superuser = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    password = models.CharField(max_length=300)
+
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["user_email","firstname","lastname","password"]
 
     def check_pass(self, hashed_pass):
-        return check_password( hashed_pass, self.password )
-    
-    def save(self, *args, **kwags):
-        if not self.password.startwith("bcrypt_sha256$") or self.password.startwith('pbkdf2_sha256$'):
-           self.password = make_password(self.password)
+        return check_password(hashed_pass, self.password)
 
-        super.save(*args,*kwargs)
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+        self.save()
+
+    def save(self, *args, **kwargs):
+        if self.password == None:
+            raise ValueError("Password cannot be None")
+        if self.password != None:
+            if self.password and not (
+                str(self.password).startswith("bcrypt_sha256$")
+                or str(self.password).startswith("pbkdf2_sha256$")
+            ):
+                self.password = make_password(self.password)
+
+        if not self.slug:
+            if self.username == None:
+                fullname = f"{self.firstname} {self.lastname}"
+                self.slug = slugify(fullname)
+            else:
+                self.slug = slugify(self.username)
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.username
+
 
 class Event(models.Model):
-    event_orgs = models.ForeignKey(Custom_User,on_delete=models.CASCADE)
+    event_orgs = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=150)
     description = models.TextField()
     banner = models.FileField(upload_to="event_banners/")
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
+    published = models.BooleanField(default=False)
+    draft = models.BooleanField(default=True)
+    completed = models.BooleanField(default=False)
+    cancelled = models.BooleanField(default=False)
+    postponed_date = models.DateTimeField(blank=True, null=True)
 
-class Custom_Field(models.Model):
-    QUEST_TYPE=[
-        ("FEEDBACK","Feedback"),
-        ("REVIEW","Review"),
-        ("REGULER","Reguler"),
-        ("OTHER","Other")
+
+class Chioce(models.Model):
+    title = models.CharField(max_length=20)
+    desc = models.TextField(max_length=400)
+    active = models.BooleanField(default=False)
+
+    def save(self):
+        return self.name
+
+
+class CustomField(models.Model):
+    QUEST_TYPE = [
+        ("FEEDBACK", "Feedback"),
+        ("REVIEW", "Review"),
+        ("REGULER", "Reguler"),
+        ("OTHER", "Other"),
     ]
-    event = models.ForeignKey(Event,on_delete=models.CASCADE,related_name='custom_field')
-    cartegory = models.CharField(choices=QUEST_TYPE,max_length=20,default="REGULER")
+    FIELD_TYPE = [
+        ("NUMBER", "Number"),
+        ("CHIOCE", "Chioce"),
+        ("DATE", "Date"),
+        ("TEXT", "Text"),
+    ]
+    event = models.ForeignKey(
+        Event, on_delete=models.CASCADE, related_name="custom_field"
+    )
+    cartegory = models.CharField(choices=QUEST_TYPE, max_length=20, default="REGULER")
     question = models.CharField(max_length=200)
-    field_type = models.CharField(max_length=30,default="text") # can contain other options like date,chioce,number and others
-    choice = models.TextField(blank=True,null=True) # if blank they use text but else use comma to differentiate chioces or number
-    required = models.BooleanField(default=False) 
-    order = models.IntegerField(default=0)    
+    field_type = models.CharField(
+        choices=FIELD_TYPE, max_length=20, default="TEXT"
+    )  # can contain other options like date,chioce,number and others
+    choice = models.ForeignKey(
+        Chioce, on_delete=models.CASCADE, related_name="chioce", blank=True, null=True
+    )  # if blank they use text but else use comma to differentiate chioces or number
+    required = models.BooleanField(default=False)
+    order = models.IntegerField(default=0)
+
 
 class Attendee(models.Model):
-    event = models.ForeignKey(Event,on_delete=models.CASCADE)
-    user = models.ForeignKey(Custom_User,on_delete=models.CASCADE)
-    reg_date = models.DateTimeField(auto_now_add=True)
+    firstname = models.CharField(max_length=255, null=True, blank=True)
+    lastname = models.CharField(max_length=255, null=True, blank=True)
+    email = models.EmailField(unique=True, null=True, blank=True)
+    phone = models.CharField(max_length=50, null=True, blank=True)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    is_guest = models.BooleanField(default=False)
+    date = models.DateTimeField(auto_now_add=True)
 
-class Custom_Answer(models.Model):
-    attendee = models.ForeignKey(Attendee,on_delete=models.CASCADE)
-    question = models.ForeignKey(Custom_Field,on_delete=models.CASCADE)
+
+class CustomAnswer(models.Model):
+    attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE)
+    question = models.OneToOneField(CustomField, on_delete=models.CASCADE, unique=True)
     answer = models.TextField()
-    

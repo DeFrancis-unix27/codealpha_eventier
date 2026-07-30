@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Custom_User,Attendee,Event,Custom_Field,Custom_Answer
+from .models import CustomUser,Attendee,Event,CustomField,CustomAnswer
 
 class RegistrationForm(forms.ModelForm):
     conf_pass = forms.CharField(
@@ -15,7 +15,7 @@ class RegistrationForm(forms.ModelForm):
         label="confirm password"
     )
     class Meta:
-        model = Custom_User
+        model = CustomUser
         fields = [
             "firstname",
             "lastname",
@@ -134,9 +134,9 @@ class EventForm(forms.ModelForm):
         )
         }
 
-class Custom_FieldForm(forms.ModelForm):
+class CustomFieldForm(forms.ModelForm):
     class Meta:
-        model = Custom_Field
+        model = CustomField
         fields = [
             "cartegory",
             "question",
@@ -203,9 +203,9 @@ class Custom_FieldForm(forms.ModelForm):
         }       
 
 
-class Custom_Answer(models.Model):
+class CustomAnswer(models.Model):
     class Meta:
-        model = Custom_Answer
+        model = CustomAnswer
         fields = [
             "answer"
         ]
