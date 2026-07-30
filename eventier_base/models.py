@@ -2,9 +2,44 @@ from django.db import models
 from django.utils.text import slugify
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin
+from django.contrib.auth.models import BaseUserManager
 
 # Create your models here.
 
+class CustomUserManager(BaseUserManager):
+    def create_user(self, username, user_email, firstname, lastname, password=None):
+        if not username:
+            raise ValueError("Users must have a username")
+        if not user_email:
+            raise ValueError("Users must have an email address")
+        if not firstname:
+            raise ValueError("Users must have a first name")
+        if not lastname:
+            raise ValueError("Users must have a last name")
+
+        user = self.model(
+            username=username,
+            user_email=self.normalize_email(user_email),
+            firstname=firstname,
+            lastname=lastname,
+        )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, user_email, firstname, lastname, password):
+        user = self.create_user(
+            username=username,
+            user_email=user_email,
+            firstname=firstname,
+            lastname=lastname,
+            password=password,
+        )
+        user.is_admin = True
+        user.is_staff = True
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
 
 class CustomUser(AbstractBaseUser,PermissionsMixin):
     firstname = models.CharField(max_length=20, blank=False, null=False)
@@ -12,13 +47,13 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     user_email = models.EmailField(unique=True, blank=False, null=False)
     slug = models.SlugField(max_length=300, blank=True, unique=True)
     username = models.CharField(unique=True, max_length=25)
-    last_login = models.DateTimeField(null=True,blank=True)
-    is_superuser = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    password = models.CharField(max_length=300)
 
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["user_email","firstname","lastname","password"]
+
+    objects = CustomUserManager()
 
     def check_pass(self, hashed_pass):
         return check_password(hashed_pass, self.password)
