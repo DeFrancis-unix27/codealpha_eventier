@@ -65,6 +65,7 @@ class DeleteAccountView(generics.DestroyAPIView):
 
 
 class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         logout(request)
         return Response(
@@ -79,6 +80,7 @@ class EventCreateView(CreateAPIView):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
+    
 
     def perform_create(self, serializer):
         serializer.save(event_orgs=self.request.user)
@@ -94,29 +96,40 @@ class EventListView(generics.ListAPIView):
 
 # list all published events only
 class PublishedEventListView(generics.ListAPIView):
-    queryset = Event.objects.filter(published=True)
+    queryset = Event.objects.filter(state="published")
     serializer_class = EventSerializer
     permission_classes = [AllowAny]
 
 
 # list all completed events only
-class CompletedEventListView(generics.ListAPIView):
-    queryset = Event.objects.filter(completed=True)
+class CompeletedEventListView(generics.ListAPIView):
+    queryset = Event.objects.filter(state="completed")
     serializer_class = EventSerializer
     permission_classes = [AllowAny]
 
 
 # list all cancelled events only
 class CancelledEventListView(generics.ListAPIView):
-    queryset = Event.objects.filter(cancelled=True)
+    queryset = Event.objects.filter(state="cancelled")
     serializer_class = EventSerializer
     permission_classes = [AllowAny]
 
 
+class PostponedEventListView(generics.ListAPIView):
+    queryset = Event.objects.filter(state="postponed")
+    serializer_class = EventSerializer
+    permission_classes = [AllowAny]
+
+
+class DraftEventListView(generics.ListAPIView):
+    queryset = Event.objects.filter(state="draft")
+    serializer_class = EventSerializer
+    permission_classes = [IsAuthenticated]
+
 # }
 
 
-# get in to see event by pk
+# get in to see event by id
 class RetriveEventView(generics.RetrieveAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
@@ -128,6 +141,7 @@ class RetriveEventView(generics.RetrieveAPIView):
 
 class UpdateEventView(generics.UpdateAPIView):
     queryset = Event.objects.all()
+    
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated, Owned]
 
@@ -137,53 +151,91 @@ class DeleteEventView(generics.DestroyAPIView):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated, Owned]
 
-
+# -----  end of event ------
 class CreateChioce(CreateAPIView):
-    queryset = Chioce
+    queryset = Chioce.objects.all()
+    serializer_class = ChioceSerializer
+    permission_classes = [IsAuthenticated]
+
+    
+class ListChioce(generics.ListAPIView):
+    queryset = Chioce.objects.all()
     serializer_class = ChioceSerializer
     permission_classes = [IsAuthenticated]
 
 
 class RetriveChioce(generics.RetrieveAPIView):
-    queryset = Chioce
+    queryset = Chioce.objects.all()
     serializer_class = ChioceSerializer
     permission_classes = [IsAuthenticated]
 
 
 class UpdateChioce(generics.UpdateAPIView):
-    queryset = Chioce
+    queryset = Chioce.objects.all()
     serializer_class = ChioceSerializer
     permission_classes = [IsAuthenticated]
 
 
 class DeleteChioce(generics.DestroyAPIView):
-    queryset = Chioce
+    queryset = Chioce.objects.all()
     serializer_class = ChioceSerializer
     permission_classes = [IsAuthenticated]
 
 
-# ------------------------------------Chioce -----------------------------------------------------------
+# ------------------------------------ end Chioce -----------------------------------------------------------
 
 
 class CreateCustomField(CreateAPIView):
-    queryset = CustomField
+    queryset = CustomField.objects.all()
     serializer_class = CustomFieldSerializer
     permission_classes = [IsAuthenticated]
 
+class ListCustomField(generics.ListAPIView):
+    queryset = CustomField.objects.all()
+    serializer_class = CustomFieldSerializer
+    permission_classes = [IsAuthenticated]
 
 class RetriveCustomField(generics.RetrieveAPIView):
-    queryset = CustomField
+    queryset = CustomField.objects.all()
     serializer_class = CustomFieldSerializer
     permission_classes = [IsAuthenticated]
 
 
 class UpdateCustomField(generics.UpdateAPIView):
-    queryset = CustomField
+    queryset = CustomField.objects.all()
     serializer_class = CustomFieldSerializer
     permission_classes = [IsAuthenticated]
 
 
 class DeleteCustomField(generics.DestroyAPIView):
-    queryset = CustomField
+    queryset = CustomField.objects.all()
     serializer_class = CustomFieldSerializer
     permission_classes = [IsAuthenticated]
+
+class CreateAttendee(CreateAPIView):
+    queryset = Attendee.objects.all()
+    serializer_class = AttendeeSerializer
+    permission_classes = [AllowAny]
+
+
+class ListAttendces(generics.ListAPIView):
+    serializer_class = AttendeeSerializer
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        return Attendee.objects.filter(
+        event__event_org = self.request.user
+    )
+
+class CreateCustomAnswer(CreateAPIView):
+    serializer_class = CustomAnswerSerializer
+    queryset = CustomAnswer.objects.all()
+    permission_classes = [AllowAny]
+
+
+class ListCustomAnswer(generics.ListAPIView):
+    serializer_class = CustomAnswerSerializer
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        return CustomAnswer.objects.filter(
+            question__event__event_orgs=self.request.user
+        )

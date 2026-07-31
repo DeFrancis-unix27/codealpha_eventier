@@ -63,10 +63,11 @@ class LoginSerializer(serializers.Serializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
+    organizer = serializers.CharField(source="event_orgs.username",read_only=True)
     class Meta:
         model = Event
         fields = "__all__"
-        read_only_fields = ["event_orgs"]
+        read_only_fields=["event_orgs"]
 
 
 class ChioceSerializer(serializers.ModelSerializer):
@@ -98,3 +99,10 @@ class CustomAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomAnswer
         fields = "__all__"
+
+    def validate(self, attrs):
+        if CustomAnswer.objects.filter(
+            attendee = attrs["attendee"],
+            question = attrs["question"]).exists():
+            raise ValueError("sorry dear you can't answer one question two times thanks ")
+        return attrs

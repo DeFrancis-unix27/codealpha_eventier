@@ -1,0 +1,135 @@
+### variables 
+@uuid=740ad401-108f-4273-86e9-989af964accc
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg1NTExMTQ0LCJpYXQiOjE3ODU1MDg3NDQsImp0aSI6Ijc0YmUyNmEwZTZmNDQ1ODE5NzM3OGMwOGEyNjRlMzI5IiwidXNlcl9pZCI6ImU0ZTI2NGE2LWM3ZTItNDNlYS04MmQwLTc2N2ExY2I1ZWM3OCJ9.w9HFnyJyZ72PKe6FYWTJ966hv-jCorL-baU8zWBGYQ0
+### Regster Account
+POST  http://127.0.0.1:8000/reg/
+Content-Type: application/json
+
+{
+    "username":"Jane",
+    "firstname":"jackson",
+    "lastname":"fedland",
+    "user_email":"emeka@gmail.com",
+    "password":"123456789",
+    "confirm_password":"123456789"
+}
+
+### Login 
+
+POST http://127.0.0.1:8000/log/
+Content-Type: application/json
+
+{
+    "username":"Jane",
+    "password":"123456789"
+}
+
+
+### Create Event
+
+POST  http://127.0.0.1:8000/create_event/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "title":"First Event",
+    "description":"first event description ",
+    "start_date":"2026-08-09",
+    "end_date":"2027-07-09",
+}
+
+### list Event 
+GET http://127.0.0.1:8000/list_events/
+Content-Type: application/json
+
+### all published events
+GET http://127.0.0.1:8000/allpub_events/
+Content-Type: application/json
+
+### all compeleted events
+GET http://127.0.0.1:8000/allcomp_events/
+Content-Type: application/json
+### all postponded events
+GET http://127.0.0.1:8000/allpost_events/
+Content-Type: application/json
+
+### all cancelled events
+GET http://127.0.0.1:8000/allcancel_events/
+Content-Type: application/json
+
+### all drafted events
+GET http://127.0.0.1:8000/alldraft_events/
+Content-Type: application/json
+
+
+### retrive_event
+
+GET http://127.0.0.1:8000/event/{{uuid}}/
+Content-Type: application/json
+
+### delete event
+DELETE http://127.0.0.1:8000/delete_event/{{uuid}}/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg1NDQ5NjM1LCJpYXQiOjE3ODU0NDcyMzUsImp0aSI6IjEyODE2NDcwMDBjNDQ5ZTU5OGFmMTkxMTk1MTVmN2JjIiwidXNlcl9pZCI6ImU0ZTI2NGE2LWM3ZTItNDNlYS04MmQwLTc2N2ExY2I1ZWM3OCJ9.lkiOnNI6N9qdCFnrxWTqIy0Azcn7TncEFfr9y_PL2yU
+
+
+### create Chioce
+POST http://127.0.0.1:8000/create_chioce/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "title":"employed",
+    "desc":"if you are undergradeted finished only your secondary school",
+    "active":false
+}
+
+### list chioce
+GET http://127.0.0.1:8000/list_chioce/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+### Retrive chioce
+GET http://127.0.0.1:8000/retrive_chioce/4/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+### update chioce
+PATCH http://127.0.0.1:8000/update_chioce/3/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "active":true
+}
+
+### delete chioce
+DELETE http://127.0.0.1:8000/delete_chioce/3/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+
+### Create CustomField
+POST http://127.0.0.1:8000/create_customfield/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "event":"740ad401-108f-4273-86e9-989af964accc",
+    "cartegory":"REVIEW",
+    "question":"Please how are you",
+    "field_type":"TEXT",
+}
+
+### list customfield
+GET http://127.0.0.1:8000/list_customfield/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### delete customfield
+DELETE http://127.0.0.1:8000/delete_customfield/1/
+# Content-Type: application/json
+Authorization: Bearer {{token}}

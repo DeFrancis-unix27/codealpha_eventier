@@ -1,10 +1,12 @@
 from django.db import models
+import uuid
 from django.utils.text import slugify
 from django.contrib.auth.hashers import make_password, check_password
-from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.auth.models import BaseUserManager
 
 # Create your models here.
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, user_email, firstname, lastname, password=None):
@@ -41,7 +43,9 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-class CustomUser(AbstractBaseUser,PermissionsMixin):
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     firstname = models.CharField(max_length=20, blank=False, null=False)
     lastname = models.CharField(max_length=20, blank=False, null=False)
     user_email = models.EmailField(unique=True, blank=False, null=False)
@@ -51,7 +55,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["user_email","firstname","lastname","password"]
+    REQUIRED_FIELDS = ["user_email", "firstname", "lastname", "password"]
 
     objects = CustomUserManager()
 
@@ -86,26 +90,39 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
 
 
 class Event(models.Model):
+    STATUS = [
+        ("draft","Draft"),
+        ("published","Published"),
+        ("completed","Completed"),
+        ("cancelled","Cancelled"),
+        ("postponed","Postponed"),
+    ]
     event_orgs = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
+    slug = models.SlugField(max_length=300, blank=True, unique=True,null=True)
     title = models.CharField(max_length=150)
     description = models.TextField()
-    banner = models.FileField(upload_to="event_banners/")
+    banner = models.FileField(upload_to="event_banners/", blank=True, null=True)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    published = models.BooleanField(default=False)
-    draft = models.BooleanField(default=True)
-    completed = models.BooleanField(default=False)
-    cancelled = models.BooleanField(default=False)
+    state = models.CharField(max_length=30, choices=STATUS, default="draft")
     postponed_date = models.DateTimeField(blank=True, null=True)
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+
+        if self.postponed_date:
+            self.state = "postponed"
+        super().save(*args,**kwargs)
 
 class Chioce(models.Model):
-    title = models.CharField(max_length=20)
+    title = models.CharField(max_length=20,unique=True)
     desc = models.TextField(max_length=400)
     active = models.BooleanField(default=False)
 
-    def save(self):
-        return self.name
+    def __str__(self):
+        return self.title
 
 
 class CustomField(models.Model):
@@ -121,6 +138,7 @@ class CustomField(models.Model):
         ("DATE", "Date"),
         ("TEXT", "Text"),
     ]
+    id = models.UUIDField(primary_key=True,default=uuid.uuid4,unique=True,editable=False)
     event = models.ForeignKey(
         Event, on_delete=models.CASCADE, related_name="custom_field"
     )
@@ -137,6 +155,7 @@ class CustomField(models.Model):
 
 
 class Attendee(models.Model):
+    id = models.UUIDField(primary_key=True,unique=True, default=uuid.uuid4, editable=False)
     firstname = models.CharField(max_length=255, null=True, blank=True)
     lastname = models.CharField(max_length=255, null=True, blank=True)
     email = models.EmailField(unique=True, null=True, blank=True)
@@ -148,6 +167,7 @@ class Attendee(models.Model):
 
 
 class CustomAnswer(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE)
-    question = models.OneToOneField(CustomField, on_delete=models.CASCADE, unique=True)
+    question = models.ForeignKey(CustomField, on_delete=models.CASCADE)
     answer = models.TextField()
