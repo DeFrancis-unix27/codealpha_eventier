@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+from django.utils import timezone
 from django.utils.text import slugify
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -91,15 +92,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class Event(models.Model):
     STATUS = [
-        ("draft","Draft"),
-        ("published","Published"),
-        ("completed","Completed"),
-        ("cancelled","Cancelled"),
-        ("postponed","Postponed"),
+        ("draft", "Draft"),
+        ("published", "Published"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+        ("postponed", "Postponed"),
     ]
     event_orgs = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
-    slug = models.SlugField(max_length=300, blank=True, unique=True,null=True)
+    slug = models.SlugField(max_length=300, blank=True, unique=True, null=True)
     title = models.CharField(max_length=150)
     description = models.TextField()
     banner = models.FileField(upload_to="event_banners/", blank=True, null=True)
@@ -111,13 +112,14 @@ class Event(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
-
+        
         if self.postponed_date:
             self.state = "postponed"
-        super().save(*args,**kwargs)
+        super().save(*args, **kwargs)
+
 
 class Chioce(models.Model):
-    title = models.CharField(max_length=20,unique=True)
+    title = models.CharField(max_length=20, unique=True)
     desc = models.TextField(max_length=400)
     active = models.BooleanField(default=False)
 
@@ -138,7 +140,9 @@ class CustomField(models.Model):
         ("DATE", "Date"),
         ("TEXT", "Text"),
     ]
-    id = models.UUIDField(primary_key=True,default=uuid.uuid4,unique=True,editable=False)
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, unique=True, editable=False
+    )
     event = models.ForeignKey(
         Event, on_delete=models.CASCADE, related_name="custom_field"
     )
@@ -155,19 +159,33 @@ class CustomField(models.Model):
 
 
 class Attendee(models.Model):
-    id = models.UUIDField(primary_key=True,unique=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(
+        primary_key=True, unique=True, default=uuid.uuid4, editable=False
+    )
     firstname = models.CharField(max_length=255, null=True, blank=True)
     lastname = models.CharField(max_length=255, null=True, blank=True)
     email = models.EmailField(unique=True, null=True, blank=True)
     phone = models.CharField(max_length=50, null=True, blank=True)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,blank=True,null=True)
     is_guest = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwags):
+        if not self.user:
+            self.is_guest = True
+        else:
+            self.firstname = self.user.firstname
+            self.lastname = self.user.lastname
+            self.email = self.user.user_email
+            self.is_guest = False
+        return super().save(*args, **kwags)
+
 
 class CustomAnswer(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, unique=True, editable=False
+    )
     attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE)
     question = models.ForeignKey(CustomField, on_delete=models.CASCADE)
     answer = models.TextField()

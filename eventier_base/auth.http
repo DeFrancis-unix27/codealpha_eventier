@@ -1,6 +1,6 @@
 ### variables 
 @uuid=740ad401-108f-4273-86e9-989af964accc
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg1NTExMTQ0LCJpYXQiOjE3ODU1MDg3NDQsImp0aSI6Ijc0YmUyNmEwZTZmNDQ1ODE5NzM3OGMwOGEyNjRlMzI5IiwidXNlcl9pZCI6ImU0ZTI2NGE2LWM3ZTItNDNlYS04MmQwLTc2N2ExY2I1ZWM3OCJ9.w9HFnyJyZ72PKe6FYWTJ966hv-jCorL-baU8zWBGYQ0
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg1NTg0NDYzLCJpYXQiOjE3ODU1ODIwNjMsImp0aSI6IjU5NThkNDhjOWVkMjRmOWM5N2Q3ZmU5ZTVmNWRjZWFkIiwidXNlcl9pZCI6ImU0ZTI2NGE2LWM3ZTItNDNlYS04MmQwLTc2N2ExY2I1ZWM3OCJ9.-4QRyZIO8f0-0sK4EH5a92Hy6hIvLf16yGjWP6ckUSg
 ### Regster Account
 POST  http://127.0.0.1:8000/reg/
 Content-Type: application/json
@@ -25,6 +25,10 @@ Content-Type: application/json
 }
 
 
+###list users
+GET http://127.0.0.1:8000/list_users/
+Content-Type: application/json
+Authorization: Bearer {{token}}
 ### Create Event
 
 POST  http://127.0.0.1:8000/create_event/
@@ -129,7 +133,17 @@ GET http://127.0.0.1:8000/list_customfield/
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
-### delete customfield
-DELETE http://127.0.0.1:8000/delete_customfield/1/
-# Content-Type: application/json
+# ### delete customfield
+# DELETE http://127.0.0.1:8000/delete_customfield/1/
+# # Content-Type: application/json
+# Authorization: Bearer {{token}}
+
+### list Attendee
+GET http://127.0.0.1:8000/list_attendees/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### list CustomAnswer
+GET http://127.0.0.1:8000/list_customanswers/
+Content-Type: application/json
 Authorization: Bearer {{token}}

@@ -20,6 +20,7 @@ from rest_framework.permissions import BasePermission
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import logout
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.utils import timezone
 
 # Create your views here.
 
@@ -57,6 +58,12 @@ class LoginView(APIView):
         )
 
 
+class ListUsersView(generics.ListAPIView):
+    serializer_class = RegisterSerializer
+    queryset = CustomUser.objects.all()
+    permission_classes = [IsAuthenticated]
+
+
 class DeleteAccountView(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated]
 
@@ -66,6 +73,7 @@ class DeleteAccountView(generics.DestroyAPIView):
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
         logout(request)
         return Response(
@@ -80,7 +88,6 @@ class EventCreateView(CreateAPIView):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
-    
 
     def perform_create(self, serializer):
         serializer.save(event_orgs=self.request.user)
@@ -126,6 +133,7 @@ class DraftEventListView(generics.ListAPIView):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
 
+
 # }
 
 
@@ -141,7 +149,7 @@ class RetriveEventView(generics.RetrieveAPIView):
 
 class UpdateEventView(generics.UpdateAPIView):
     queryset = Event.objects.all()
-    
+
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated, Owned]
 
@@ -151,13 +159,14 @@ class DeleteEventView(generics.DestroyAPIView):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated, Owned]
 
+
 # -----  end of event ------
 class CreateChioce(CreateAPIView):
     queryset = Chioce.objects.all()
     serializer_class = ChioceSerializer
     permission_classes = [IsAuthenticated]
 
-    
+
 class ListChioce(generics.ListAPIView):
     queryset = Chioce.objects.all()
     serializer_class = ChioceSerializer
@@ -190,10 +199,12 @@ class CreateCustomField(CreateAPIView):
     serializer_class = CustomFieldSerializer
     permission_classes = [IsAuthenticated]
 
+
 class ListCustomField(generics.ListAPIView):
     queryset = CustomField.objects.all()
     serializer_class = CustomFieldSerializer
     permission_classes = [IsAuthenticated]
+
 
 class RetriveCustomField(generics.RetrieveAPIView):
     queryset = CustomField.objects.all()
@@ -212,6 +223,7 @@ class DeleteCustomField(generics.DestroyAPIView):
     serializer_class = CustomFieldSerializer
     permission_classes = [IsAuthenticated]
 
+
 class CreateAttendee(CreateAPIView):
     queryset = Attendee.objects.all()
     serializer_class = AttendeeSerializer
@@ -221,10 +233,18 @@ class CreateAttendee(CreateAPIView):
 class ListAttendces(generics.ListAPIView):
     serializer_class = AttendeeSerializer
     permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
-        return Attendee.objects.filter(
-        event__event_org = self.request.user
-    )
+        return Attendee.objects.filter(event__event_orgs=self.request.user)
+
+
+class RetriveAttendee(generics.RetrieveAPIView):
+    serializer_class = AttendeeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Attendee.objects.filter(event__event_orgs=self.request.user)
+
 
 class CreateCustomAnswer(CreateAPIView):
     serializer_class = CustomAnswerSerializer
@@ -232,10 +252,21 @@ class CreateCustomAnswer(CreateAPIView):
     permission_classes = [AllowAny]
 
 
-class ListCustomAnswer(generics.ListAPIView):
+class ListCustomAnswers(generics.ListAPIView):
     serializer_class = CustomAnswerSerializer
     permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         return CustomAnswer.objects.filter(
             question__event__event_orgs=self.request.user
         )
+
+
+class PublicView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        events = Event.objects.filter(state="published", date__gte=timezone.now())
+
+        serializer = EventSerializer(events, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
