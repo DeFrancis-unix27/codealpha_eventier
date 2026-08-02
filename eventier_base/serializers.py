@@ -119,7 +119,11 @@ class AttendeeSerializer(serializers.ModelSerializer):
             for field in required:
                 if not attrs.get(field):
                     raise serializers.ValidationError(
-                        f"{field} is required (if you have not registered yet )"
+                        f"{field} is required (if you have not registered
+ yet )"
+         if attrs.get("postponed_date"):
+             if attrs.get("start_date") < attra.get("end_date"):
+                 raise ValueError("postponed to the past? common!")
                     )
         return attrs
 
