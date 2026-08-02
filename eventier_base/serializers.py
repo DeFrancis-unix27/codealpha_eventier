@@ -121,11 +121,6 @@ class AttendeeSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         f"{field} is required (if you have not registered yet )"
                     )
-                user_email = attrs["email"] = user.user_email
-                if user_email.exists():
-                    raise serializers.ValidationError(
-                        "dear an account has uses this email"
-                    )
         return attrs
 
 
