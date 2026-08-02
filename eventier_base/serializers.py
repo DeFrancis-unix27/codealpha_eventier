@@ -31,10 +31,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        print(validated_data)
         validated_data.pop("confirm_password")
-
-        print(validated_data)
         password = validated_data.pop("password")
         user = CustomUser.objects.create(**validated_data)
 
