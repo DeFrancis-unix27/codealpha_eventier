@@ -9,6 +9,7 @@ from .serializers import (
     CustomAnswerSerializer,
     ChioceSerializer,
 )
+from rest_framework import filters
 from rest_framework import generics
 from rest_framework.generics import CreateAPIView
 from rest_framework import status
@@ -262,11 +263,38 @@ class ListCustomAnswers(generics.ListAPIView):
         )
 
 
-class PublicView(APIView):
+class PublicView(generics.ListAPIView):
     permission_classes = [AllowAny]
+    serializer_class = EventSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["title", "start_date", "end_date"]
 
-    def get(self, request, *args, **kwargs):
-        events = Event.objects.filter(state="published", date__gte=timezone.now())
+    def get_queryset(self):
+        return Event.objects.filter(state="published")
 
-        serializer = EventSerializer(events, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class UserPalace(APIView):
+    permission_classes: list = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        total_event = Event.objects.filter(event_orgs=user).count()
+        published_event = Event.objects.filter(
+            state="published", event_orgs=user
+        ).count()
+        draft_event = Event.objects.filter(state="draft", event_orgs=user).count()
+        total_attendees = Attendee.objects.filter(event__event_orgs=user).count()
+        upcoming_events = Event.objects.filter(state="published").order_by("start_date").first()
+        recent_events = Event.objects.filter(event_orgs=user).order_by("start_date")[:7]
+        recent_attendee = Attendee.objects.filter(event__event_orgs=user).order_by("date")
+        return Response(
+            {
+                "total_event": total_event,
+                "published_event": published_event,
+                "draft_event": draft_event,
+                "total_attendee": total_attendees,
+                "upcoming_events": EventSerializer(upcoming_events).data if upcoming_events else None ,
+                "recent_events": EventSerializer(recent_events,many=True).data,
+                "recent_attendee": AttendeeSerializer(recent_attendee, many=True).data,
+            }
+        )

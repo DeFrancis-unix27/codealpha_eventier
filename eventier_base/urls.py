@@ -29,7 +29,8 @@ urlpatterns = [
     path("retrive_attendee/<uuid:pk>/", views.RetriveAttendee.as_view()),
     path("create_customanswer/", views.CreateCustomAnswer.as_view()),
     path("list_customanswers/", views.ListCustomAnswers.as_view()),
-
+    path("", views.PublicView.as_view()),
+    path("my/",views.UserPalace.as_view()),
 
     # debug pupose only
     path("list_users/",views.ListUsersView.as_view())

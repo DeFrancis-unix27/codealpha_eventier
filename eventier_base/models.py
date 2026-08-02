@@ -112,7 +112,8 @@ class Event(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
-        
+        if self.start_date or self.end_date <   timezone.now():
+            raise ValueError("check your date it is in the past")
         if self.postponed_date:
             self.state = "postponed"
         super().save(*args, **kwargs)

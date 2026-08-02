@@ -1,6 +1,6 @@
 ### variables 
 @uuid=740ad401-108f-4273-86e9-989af964accc
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg1NTg0NDYzLCJpYXQiOjE3ODU1ODIwNjMsImp0aSI6IjU5NThkNDhjOWVkMjRmOWM5N2Q3ZmU5ZTVmNWRjZWFkIiwidXNlcl9pZCI6ImU0ZTI2NGE2LWM3ZTItNDNlYS04MmQwLTc2N2ExY2I1ZWM3OCJ9.-4QRyZIO8f0-0sK4EH5a92Hy6hIvLf16yGjWP6ckUSg
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg1NjIxMTcxLCJpYXQiOjE3ODU2MTg3NzIsImp0aSI6ImFkNDk4ZTNmYjIxYjRhMmNiMDk3NDBkOWU2YTFiYmIyIiwidXNlcl9pZCI6ImU0ZTI2NGE2LWM3ZTItNDNlYS04MmQwLTc2N2ExY2I1ZWM3OCJ9.pQjyisX99OswQOaJWBsgU_y4_axNvLhjg5HDVxjIDt8
 ### Regster Account
 POST  http://127.0.0.1:8000/reg/
 Content-Type: application/json
@@ -38,6 +38,7 @@ Authorization: Bearer {{token}}
 {
     "title":"First Event",
     "description":"first event description ",
+    "state":"published"
     "start_date":"2026-08-09",
     "end_date":"2027-07-09",
 }
@@ -145,5 +146,20 @@ Authorization: Bearer {{token}}
 
 ### list CustomAnswer
 GET http://127.0.0.1:8000/list_customanswers/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Public
+GET http://127.0.0.1:8000/
+Content-Type: application/json
+
+
+### Public by search
+GET http://127.0.0.1:8000/?search=confrence-meatup
+Content-Type: application/json
+
+
+### Private dash
+GET http://127.0.0.1:8000/my/
 Content-Type: application/json
 Authorization: Bearer {{token}}
