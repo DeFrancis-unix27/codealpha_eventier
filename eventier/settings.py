@@ -104,7 +104,7 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME":timedelta(minutes=40),
     "REFRESH_TOKEN_LIFETIME":timedelta(days=7),
-    "ROTATE_REFERSH_TOKEN":False,
+    "ROTATE_REFERSH_TOKEN":True,
     "BLACKLIST_AFTER_ROTATION":False,
     "UPDATE_LAST_LOGIN":True
 }
@@ -161,7 +161,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "/media"
+MEDIA_ROOT = BASE_DIR / "media"
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
