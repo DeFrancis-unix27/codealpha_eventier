@@ -82,7 +82,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ),
     #pagination
-    "DEFAULT_PAGINATION_CLASSES":"rest_framework.pagenation.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASSES":"rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE":10,
         
     
