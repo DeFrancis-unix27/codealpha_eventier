@@ -76,7 +76,10 @@ class EventSerializer(serializers.ModelSerializer):
         if attrs.get("end_date") < attrs.get("start_date"):
             raise serializers.ValidationError(
                 "event can't end before start"
-            ) 
+            )
+if attrs.get("postponed_date"):
+             if attrs.get("start_date") < attra.get("end_date"):
+                 raise ValueError("postponed to the past? come on!")
         return attrs
 
 
@@ -121,9 +124,7 @@ class AttendeeSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         f"{field} is required (if you have not registered
  yet )"
-         if attrs.get("postponed_date"):
-             if attrs.get("start_date") < attra.get("end_date"):
-                 raise ValueError("postponed to the past? common!")
+         
                     )
         return attrs
 
