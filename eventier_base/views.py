@@ -94,49 +94,6 @@ class EventCreateView(CreateAPIView):
         serializer.save(event_orgs=self.request.user)
 
 
-# listing of event = {
-# lis all events
-class EventListView(generics.ListAPIView):
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
-    permission_classes = [AllowAny]
-
-
-# list all published events only
-class PublishedEventListView(generics.ListAPIView):
-    queryset = Event.objects.filter(state="published")
-    serializer_class = EventSerializer
-    permission_classes = [AllowAny]
-
-
-# list all completed events only
-class CompeletedEventListView(generics.ListAPIView):
-    queryset = Event.objects.filter(state="completed")
-    serializer_class = EventSerializer
-    permission_classes = [AllowAny]
-
-
-# list all cancelled events only
-class CancelledEventListView(generics.ListAPIView):
-    queryset = Event.objects.filter(state="cancelled")
-    serializer_class = EventSerializer
-    permission_classes = [AllowAny]
-
-
-class PostponedEventListView(generics.ListAPIView):
-    queryset = Event.objects.filter(state="postponed")
-    serializer_class = EventSerializer
-    permission_classes = [AllowAny]
-
-
-class DraftEventListView(generics.ListAPIView):
-    queryset = Event.objects.filter(state="draft")
-    serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated]
-
-
-# }
-
 
 # get in to see event by id
 class RetriveEventView(generics.RetrieveAPIView):
