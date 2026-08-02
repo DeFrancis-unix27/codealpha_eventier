@@ -69,10 +69,12 @@ class EventSerializer(serializers.ModelSerializer):
         read_only_fields = ["event_orgs"]
 
     def validate(self, attrs):
-        if attrs.get("start_date") or attrs.get("end_date") < timezone.now():
+        if attrs.get("start_date") < timezone.now():
             raise serializers.ValidationError(
                 "sorry dear your event are in the past try bring it to the present of future"
                 )
+        if attrs.get("end_date") < attrs.get("start_date")
+             raise ValueError("you can't end an event before it begins!")
         if attrs.get("end_date") < attrs.get("start_date"):
             raise serializers.ValidationError(
                 "event can't end before start"
