@@ -78,7 +78,7 @@ class EventSerializer(serializers.ModelSerializer):
                 "event can't end before it start"
             )
         if attrs.get("postponed_date"):
-            if attrs.get("start_date") < attrs.get("end_date"):
+            if attrs.get("postponed_date") < attrs.get("end_date"):
                 raise ValueError("postponed to the past ? come on!")
         return attrs
 
