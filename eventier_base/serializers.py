@@ -23,9 +23,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def validate(self, attrs):
-        if attrs["password"] != attrs["confirm_password"]:
+        if attrs.get("password") != attrs.get("confirm_password"):
             raise serializers.ValidationError(
-                {"password": "are you sure? this passwords match"}
+                {"password": "your passwords don't match"}
             )
         return attrs
 
@@ -54,7 +54,7 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid username or password")
 
         if not check_password(password, user.password):
-            raise serializers.ValidationError("Invalid username and password")
+            raise serializers.ValidationError("Invalid password")
 
         attrs["user"] = user
         return attrs
@@ -71,15 +71,15 @@ class EventSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs.get("start_date") < timezone.now():
             raise serializers.ValidationError(
-                "sorry dear your event are in the past try bring it to the present of future"
+                "event can't start in the past"
                 )
         if attrs.get("end_date") < attrs.get("start_date"):
             raise serializers.ValidationError(
-                "event can't end before start"
+                "event can't end before it start"
             )
-if attrs.get("postponed_date"):
-             if attrs.get("start_date") < attra.get("end_date"):
-                 raise ValueError("postponed to the past? come on!")
+        if attrs.get("postponed_date"):
+            if attrs.get("start_date") < attrs.get("end_date"):
+                raise ValueError("postponed to the past ? come on!")
         return attrs
 
 
@@ -116,14 +116,13 @@ class AttendeeSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
-        user = attrs["user"]
+        user = attrs.get("user")
         if not user:
             required = ["firstname", "lastname", "email"]
             for field in required:
                 if not attrs.get(field):
                     raise serializers.ValidationError(
-                        f"{field} is required (if you have not registered
- yet )"
+                        f"{field} is required for guest attendees"
          
                     )
         return attrs
@@ -157,9 +156,9 @@ class CustomAnswerSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if CustomAnswer.objects.filter(
-            attendee=attrs["attendee"], question=attrs["question"]
+            attendee=attrs.get("attendee"), question=attrs.get("question")
         ).exists():
             raise ValueError(
-                "sorry dear you can't answer one question two times thanks "
+                "sorry you can only answer a question once, if you want to change your answer please contact the event organizer"
             )
         return attrs

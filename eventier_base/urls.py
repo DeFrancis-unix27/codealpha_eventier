@@ -4,6 +4,8 @@ from . import views
 urlpatterns = [
     path("reg/", views.RegisterView.as_view()),
     path("log/", views.LoginView.as_view()),
+    path("logout/",views.LogoutView.as_view()),
+    path("delacc/",views.DeleteAccountView.as_view()),
     path("create_event/", views.EventCreateView.as_view()),
     path("event/<uuid:pk>/", views.RetriveEventView.as_view()),
     path("update_event/<uuid:pk>/", views.UpdateEventView.as_view()),

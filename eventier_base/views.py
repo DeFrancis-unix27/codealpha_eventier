@@ -26,7 +26,7 @@ from django.utils import timezone
 # Create your views here.
 
 
-# ============================== utlity
+# ============================== utlity ======
 class Owned(BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.event_orgs == request.user
@@ -100,23 +100,26 @@ class RetriveEventView(generics.RetrieveAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     permission_classes = [AllowAny]
+    def get_queryset(self):
+        return Event.objects.filter(event_orgs=self.request.user)
 
 
 # updating event
-
-
 class UpdateEventView(generics.UpdateAPIView):
     queryset = Event.objects.all()
-
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated, Owned]
-
+    def get_queryset(self):
+        return Event.objects.filter(event_orgs=self.request.user)
+    
 
 class DeleteEventView(generics.DestroyAPIView):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated, Owned]
-
+    def get_queryset(self):
+        return Event.objects.filter(event_orgs=self.request.user)
+    
 
 # -----  end of event ------
 class CreateChioce(CreateAPIView):
@@ -124,29 +127,34 @@ class CreateChioce(CreateAPIView):
     serializer_class = ChioceSerializer
     permission_classes = [IsAuthenticated]
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 class ListChioce(generics.ListAPIView):
-    queryset = Chioce.objects.all()
     serializer_class = ChioceSerializer
     permission_classes = [IsAuthenticated]
 
+    get_queryset = lambda self: Chioce.objects.filter(owner=self.request.user)
 
 class RetriveChioce(generics.RetrieveAPIView):
-    queryset = Chioce.objects.all()
     serializer_class = ChioceSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return Chioce.objects.filter(owner=self.request.user)
 
 class UpdateChioce(generics.UpdateAPIView):
-    queryset = Chioce.objects.all()
     serializer_class = ChioceSerializer
     permission_classes = [IsAuthenticated]
-
+    get_queryset = lambda self: Chioce.objects.filter(owner=self.request.user)
 
 class DeleteChioce(generics.DestroyAPIView):
-    queryset = Chioce.objects.all()
     serializer_class = ChioceSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Chioce.objects.filter(owner=self.request.user)
 
 
 # ------------------------------------ end Chioce -----------------------------------------------------------
@@ -157,30 +165,39 @@ class CreateCustomField(CreateAPIView):
     serializer_class = CustomFieldSerializer
     permission_classes = [IsAuthenticated]
 
+    def perform_create(self, serializer):
+        return serializer.save(event__event_orgs=self.request.user)
 
 class ListCustomField(generics.ListAPIView):
     queryset = CustomField.objects.all()
     serializer_class = CustomFieldSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return CustomField.objects.filter(event__event_orgs=self.request.user)
 
 class RetriveCustomField(generics.RetrieveAPIView):
     queryset = CustomField.objects.all()
     serializer_class = CustomFieldSerializer
     permission_classes = [IsAuthenticated]
-
+    def get_queryset(self):
+        return CustomField.objects.filter(event__event_orgs=self.request.user)
 
 class UpdateCustomField(generics.UpdateAPIView):
     queryset = CustomField.objects.all()
     serializer_class = CustomFieldSerializer
     permission_classes = [IsAuthenticated]
-
+    def get_queryset(self):
+        return CustomField.objects.filter(event__event_orgs=self.request.user)
+    
 
 class DeleteCustomField(generics.DestroyAPIView):
     queryset = CustomField.objects.all()
     serializer_class = CustomFieldSerializer
     permission_classes = [IsAuthenticated]
-
+    def get_queryset(self):
+        return CustomField.objects.filter(event__event_orgs=self.request.user)
+    
 
 class CreateAttendee(CreateAPIView):
     queryset = Attendee.objects.all()
